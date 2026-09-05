@@ -1,0 +1,19 @@
+#!/bin/bash
+STATE_FILE="$XDG_RUNTIME_DIR/steam-session-starts"
+NOW=$(date +%s)
+case "$1" in
+    --track-started)
+        touch "$STATE_FILE"
+        awk -v limit=$((NOW - 60)) '$1 > limit {print $1}' "$STATE_FILE" > "${STATE_FILE}.tmp"
+        echo "$NOW" >> "${STATE_FILE}.tmp"
+        mv "${STATE_FILE}.tmp" "$STATE_FILE"
+        CRASH_COUNT=$(wc -l < "$STATE_FILE")
+        if [ "$CRASH_COUNT" -ge 3 ]; then
+            echo "Boot loop detected ($CRASH_COUNT starts in 60s). Reverting to desktop."
+            /usr/bin/steamos-session-select plasma
+            exit 1
+        fi
+        ;;
+    --track-stopped)
+        ;;
+esac

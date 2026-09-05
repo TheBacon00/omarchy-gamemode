@@ -1,0 +1,16 @@
+[Unit]
+Description=Steam Launcher (Game Mode)
+After=graphical-session.target
+PartOf=graphical-session.target
+After=xdg-desktop-portal.service
+
+[Service]
+ExecStart=/usr/lib/steamos/steam-launcher
+ExecStartPre=/usr/lib/steamos/steam-short-session-tracker --track-started
+ExecStopPost=/usr/lib/steamos/steam-short-session-tracker --track-stopped
+ExecStop=/bin/bash -c 'kill -TERM $(pgrep -P $MAINPID || echo $MAINPID)'
+KillSignal=SIGCONT
+KillMode=mixed
+TimeoutStopSec=60
+Type=exec
+EnvironmentFile=%t/gamescope-environment

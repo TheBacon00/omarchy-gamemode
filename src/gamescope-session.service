@@ -1,0 +1,19 @@
+[Unit]
+Description=Gamescope Session
+Before=graphical-session.target
+PartOf=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target
+RefuseManualStart=yes
+Before=xdg-desktop-portal.service
+
+[Service]
+TimeoutStartSec=10
+TimeoutStopSec=15
+ExecStart=/usr/lib/steamos/gamescope-session
+ExecStopPost=/usr/bin/bash -c '/usr/bin/rm -rf "$XDG_RUNTIME_DIR"/gamescope{.,-}* /tmp/gamescope-limiter*'
+Type=notify
+NotifyAccess=all
+Environment="SRT_LOG_TO_JOURNAL=1" "XDG_SESSION_TYPE=x11"
+UnsetEnvironment=DISPLAY XAUTHORITY
+Slice=session.slice

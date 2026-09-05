@@ -1,0 +1,17 @@
+#!/bin/bash
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 <session>"
+    exit 1
+fi
+pkexec /usr/lib/steamos/steam-set-session "$1" "$USER"
+if [[ "$1" == "gamescope" ]]; then
+    if systemctl --user is-active --quiet hyprland; then
+        hyprctl dispatch exit
+    elif [ -n "$WAYLAND_DISPLAY" ]; then
+        uwsm stop
+    else
+        loginctl terminate-session $XDG_SESSION_ID
+    fi
+else
+    systemctl --user stop gamescope-session.target
+fi
