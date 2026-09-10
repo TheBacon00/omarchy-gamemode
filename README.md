@@ -18,7 +18,7 @@ This repository contains the canonical scripts to install and remove the Omarchy
 3. **Configure Keybindings:**
    In your Hyprland configuration (e.g., `~/.config/hypr/bindings.lua`), map a key to switch to Game Mode. For example:
    ```lua
-   o.bind("SUPER + ALT + G", "Enter Game Mode", "omarchy-launch-floating-terminal-with-presentation omarchy-steamos-session-interactive")
+   o.bind("SUPER + ALT + G", "Enter Game Mode", "omarchy-launch-floating-terminal-with-presentation /usr/lib/steamos/steamos-session-select-interactive")
    ```
 
 4. **Usage:**
