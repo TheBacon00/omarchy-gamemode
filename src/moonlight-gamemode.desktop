@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Moonlight
-Comment=Stream games and other applications from another PC running Sunshine or GeForce Experience
-Exec=env QT_QPA_PLATFORM=xcb SDL_VIDEO_DRIVER=x11 SDL_VIDEODRIVER=x11 PREFER_VULKAN=1 ENABLE_HDR_WSI=1 vblank_mode=0 __GL_SYNC_TO_VBLANK=0 moonlight
-Icon=moonlight
-Terminal=false
-Type=Application
-Categories=Qt;Game;
-Keywords=nvidia;gamestream;stream;sunshine;remote play;

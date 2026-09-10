@@ -1,8 +1,0 @@
-[Desktop Entry]
-Encoding=UTF-8
-Name=Steam Game Mode
-Comment=Steam Big Picture in Gamescope
-Exec=start-gamescope-session
-Icon=steamicon.png
-Type=Application
-DesktopNames=gamescope

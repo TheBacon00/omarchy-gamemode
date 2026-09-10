@@ -1,2 +1,0 @@
-#!/bin/bash
-exec steam -steamos3 -gamepadui -steamdeck
