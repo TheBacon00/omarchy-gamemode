@@ -395,7 +395,7 @@ echo "1x1" > "\$RADV_FORCE_VRS_CONFIG_FILE"
 
 # Limiter
 export GAMESCOPE_LIMITER_FILE="\$(mktemp /tmp/gamescope-limiter.XXXXXXXX)"
-export GAMESCOPE_DISABLE_ASYNC_FLIPS=1
+# (GAMESCOPE_DISABLE_ASYNC_FLIPS removed to allow VRR)
 
 # Raise fd limit
 ulimit -n 524288
