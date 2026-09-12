@@ -395,9 +395,11 @@ echo "1x1" > "\$RADV_FORCE_VRS_CONFIG_FILE"
 
 # Limiter
 export GAMESCOPE_LIMITER_FILE="\$(mktemp /tmp/gamescope-limiter.XXXXXXXX)"
-# (GAMESCOPE_DISABLE_ASYNC_FLIPS removed to allow VRR)
+export GAMESCOPE_DISABLE_ASYNC_FLIPS=1
 
-# Raise fd limit
+# Intel VRR / Crash fixes
+export INTEL_DEBUG=norbc
+export STEAM_DISPLAY_REFRESH_LIMITS=48,165
 ulimit -n 524288
 
 # --- Stats/socket setup ---
