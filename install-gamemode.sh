@@ -343,6 +343,7 @@ cat > /usr/lib/steamos/gamescope-x11-spoof.c << 'SPOOFEOF'
 #include <X11/Xlib.h>
 #include <dlfcn.h>
 #include <string.h>
+#include <stdint.h>
 
 static Atom external_atom = 0;
 
@@ -368,8 +369,8 @@ int XChangeProperty(Display *display, Window w, Atom property, Atom type,
     }
 
     if (external_atom != 0 && property == external_atom) {
-        unsigned char zero = 0;
-        return real_XChangeProperty(display, w, property, type, format, mode, &zero, 1);
+        uint32_t zero = 0;
+        return real_XChangeProperty(display, w, property, type, format, mode, (const unsigned char *)&zero, 1);
     }
 
     return real_XChangeProperty(display, w, property, type, format, mode, data, nelements);
