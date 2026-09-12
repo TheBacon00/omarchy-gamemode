@@ -429,16 +429,15 @@ if gamescope --help 2>&1 | grep -q -- "--hdr-enabled"; then
     HDR_OPTIONS="--hdr-enabled"
 fi
 
-# Use -r 165 to set the target refresh rate to the display's native max.
 # Use --generate-drm-mode fixed to force gamescope to use the display's native
-# EDID mode timings at 165Hz instead of generating synthetic CVT timings.
-# Synthetic CVT modes break VRR (Gamescope issue #975).
-# --adaptive-sync enables VRR within the display's native 48-165Hz range.
+# EDID mode timings (like 165Hz) instead of generating synthetic CVT timings.
+# Synthetic CVT modes default to 60Hz and can break VRR.
+# Omit the -r flag, as hardcoding the nested refresh rate breaks VRR (Gamescope issue #975).
+# --adaptive-sync enables VRR within the display's native range.
 exec gamescope \\
     -W ${SCREEN_WIDTH} -H ${SCREEN_HEIGHT} \\
     -w ${SCREEN_WIDTH} -h ${SCREEN_HEIGHT} \\
     -f \\
-    -r 165 \\
     --generate-drm-mode fixed \\
     --adaptive-sync \\
     \$HDR_OPTIONS \\
