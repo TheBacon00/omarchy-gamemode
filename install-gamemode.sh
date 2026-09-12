@@ -439,7 +439,7 @@ exec gamescope \
     -r 165 \
     --adaptive-sync \
     --xwayland-count 2 \
-    -e -R "$socket" -T "$stats" \
+    -e -R "\$socket" -T "\$stats" \
     --steam
 GSEOF
 chmod 755 /usr/lib/steamos/gamescope-session
