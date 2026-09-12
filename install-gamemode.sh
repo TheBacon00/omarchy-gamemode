@@ -468,7 +468,7 @@ chmod 755 /usr/lib/steamos/gamescope-session
 echo "Installing Steam launcher..."
 cat > /usr/lib/steamos/steam-launcher << 'STEAMEOF'
 #!/bin/bash
-exec steam -steamos3 -gamepadui -steamdeck
+exec steam -steamos3 -gamepadui -steampal
 STEAMEOF
 chmod 755 /usr/lib/steamos/steam-launcher
 
