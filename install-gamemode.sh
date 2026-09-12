@@ -399,7 +399,6 @@ export GAMESCOPE_DISABLE_ASYNC_FLIPS=1
 
 # Intel VRR / Crash fixes
 export INTEL_DEBUG=norbc
-export STEAM_DISPLAY_REFRESH_LIMITS=48,165
 ulimit -n 524288
 
 # --- Stats/socket setup ---
