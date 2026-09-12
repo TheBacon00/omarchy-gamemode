@@ -338,6 +338,45 @@ chmod 755 /usr/bin/start-gamescope-session
 # It handles socket-based startup coordination and environment export.
 
 
+echo "Compiling Gamescope X11 spoof for VRR visibility..."
+cat > /usr/lib/steamos/gamescope-x11-spoof.c << 'SPOOFEOF'
+#include <X11/Xlib.h>
+#include <dlfcn.h>
+#include <string.h>
+
+static Atom external_atom = 0;
+
+Atom XInternAtom(Display *display, const char *atom_name, Bool only_if_exists) {
+    static Atom (*real_XInternAtom)(Display *, const char *, Bool) = NULL;
+    if (!real_XInternAtom) {
+        real_XInternAtom = (Atom (*)(Display *, const char *, Bool))dlsym(RTLD_NEXT, "XInternAtom");
+    }
+    
+    Atom a = real_XInternAtom(display, atom_name, only_if_exists);
+    if (atom_name && strcmp(atom_name, "GAMESCOPE_DISPLAY_IS_EXTERNAL") == 0) {
+        external_atom = a;
+    }
+    return a;
+}
+
+int XChangeProperty(Display *display, Window w, Atom property, Atom type,
+                    int format, int mode, const unsigned char *data, int nelements)
+{
+    static int (*real_XChangeProperty)(Display *, Window, Atom, Atom, int, int, const unsigned char *, int) = NULL;
+    if (!real_XChangeProperty) {
+        real_XChangeProperty = (int (*)(Display *, Window, Atom, Atom, int, int, const unsigned char *, int))dlsym(RTLD_NEXT, "XChangeProperty");
+    }
+
+    if (external_atom != 0 && property == external_atom) {
+        unsigned char zero = 0;
+        return real_XChangeProperty(display, w, property, type, format, mode, &zero, 1);
+    }
+
+    return real_XChangeProperty(display, w, property, type, format, mode, data, nelements);
+}
+SPOOFEOF
+gcc -shared -fPIC /usr/lib/steamos/gamescope-x11-spoof.c -o /usr/lib/steamos/gamescope-x11-spoof.so -ldl -lX11
+
 echo "Installing gamescope session script..."
 cat > /usr/lib/steamos/gamescope-session << GSEOF
 #!/bin/bash
@@ -361,6 +400,7 @@ export STEAM_GAMESCOPE_HAS_TEARING_SUPPORT=1
 export STEAM_GAMESCOPE_TEARING_SUPPORTED=1
 export STEAM_GAMESCOPE_VRR_SUPPORTED=1
 
+export STEAM_DISPLAY_REFRESH_LIMITS=48,165
 export ENABLE_GAMESCOPE_WSI=1
 export vk_xwayland_wait_ready=false
 export GAMESCOPE_NV12_COLORSPACE=k_EStreamColorspace_BT601
@@ -432,11 +472,11 @@ if gamescope --help 2>&1 | grep -q -- "--hdr-enabled"; then
     HDR_OPTIONS="--hdr-enabled"
 fi
 
-exec gamescope \
+LD_PRELOAD="/usr/lib/steamos/gamescope-x11-spoof.so" exec gamescope \
     -W ${SCREEN_WIDTH} -H ${SCREEN_HEIGHT} \
     -w ${SCREEN_WIDTH} -h ${SCREEN_HEIGHT} \
     -f \
-    -r 165 \
+    --generate-drm-mode fixed \
     --adaptive-sync \
     --xwayland-count 2 \
     -e -R "\$socket" -T "\$stats" \
