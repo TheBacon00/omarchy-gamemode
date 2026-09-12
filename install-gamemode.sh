@@ -337,6 +337,17 @@ chmod 755 /usr/bin/start-gamescope-session
 # This is the actual script that launches gamescope with all the right flags.
 # It handles socket-based startup coordination and environment export.
 
+echo "Installing gamescope lua workaround for external display refresh rates..."
+mkdir -p /home/\${GAME_USER}/.config/gamescope/scripts
+cat > /home/\${GAME_USER}/.config/gamescope/scripts/enable-external-refresh-rates.lua << 'LUAEOF'
+local name = "drm_allow_dynamic_modes_for_external_display"
+local cv = gamescope.convars[name]
+if cv ~= nil then
+    cv.value = true
+end
+LUAEOF
+chown -R \${GAME_USER}:\${GAME_USER} /home/\${GAME_USER}/.config/gamescope
+
 echo "Installing gamescope session script..."
 cat > /usr/lib/steamos/gamescope-session << GSEOF
 #!/bin/bash
