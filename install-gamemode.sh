@@ -438,7 +438,7 @@ read_gamescope_env() {
 # Diagnostic: Dump X11 atoms after gamescope starts
 (
     sleep 3
-    DISPLAY=:1 xprop -root > /tmp/gamescope_xprop.txt 2>&1
+    DISPLAY=:0 xprop -root > /tmp/gamescope_xprop.txt 2>&1
     # also dump DRM properties while gamescope is running
     proptest -M xe > /tmp/gamescope_drm_proptest.txt 2>&1
 ) &
