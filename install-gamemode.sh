@@ -337,16 +337,6 @@ chmod 755 /usr/bin/start-gamescope-session
 # This is the actual script that launches gamescope with all the right flags.
 # It handles socket-based startup coordination and environment export.
 
-echo "Installing gamescope lua workaround for external display refresh rates..."
-mkdir -p /home/${GAME_USER}/.config/gamescope/scripts
-cat > /home/${GAME_USER}/.config/gamescope/scripts/enable-external-refresh-rates.lua << 'LUAEOF'
-local name = "drm_allow_dynamic_modes_for_external_display"
-local cv = gamescope.convars[name]
-if cv ~= nil then
-    cv.value = true
-end
-LUAEOF
-chown -R ${GAME_USER}:${GAME_USER} /home/${GAME_USER}/.config/gamescope
 
 echo "Installing gamescope session script..."
 cat > /usr/lib/steamos/gamescope-session << GSEOF
@@ -370,6 +360,7 @@ export STEAM_GAMESCOPE_HDR_SUPPORTED=1
 export STEAM_GAMESCOPE_HAS_TEARING_SUPPORT=1
 export STEAM_GAMESCOPE_TEARING_SUPPORTED=1
 export STEAM_GAMESCOPE_VRR_SUPPORTED=1
+
 export ENABLE_GAMESCOPE_WSI=1
 export vk_xwayland_wait_ready=false
 export GAMESCOPE_NV12_COLORSPACE=k_EStreamColorspace_BT601
@@ -395,7 +386,6 @@ echo "1x1" > "\$RADV_FORCE_VRS_CONFIG_FILE"
 
 # Limiter
 export GAMESCOPE_LIMITER_FILE="\$(mktemp /tmp/gamescope-limiter.XXXXXXXX)"
-export GAMESCOPE_DISABLE_ASYNC_FLIPS=1
 
 # Intel VRR / Crash fixes
 export INTEL_DEBUG=norbc
@@ -434,13 +424,6 @@ read_gamescope_env() {
 # Spawn the env reader in parallel
 (read_gamescope_env &)
 
-# Diagnostic: Dump X11 atoms after gamescope starts
-(
-    sleep 3
-    DISPLAY=:0 xprop -root > /tmp/gamescope_xprop.txt 2>&1
-    # also dump DRM properties while gamescope is running
-    proptest -M xe > /tmp/gamescope_drm_proptest.txt 2>&1
-) &
 
 # --- Launch gamescope ---
 # HDR options (only if supported)
@@ -449,23 +432,14 @@ if gamescope --help 2>&1 | grep -q -- "--hdr-enabled"; then
     HDR_OPTIONS="--hdr-enabled"
 fi
 
-# Use --generate-drm-mode fixed to force gamescope to use the display's native
-# EDID mode timings (like 165Hz) instead of generating synthetic CVT timings.
-# Synthetic CVT modes default to 60Hz and can break VRR.
-# Omit the -r flag, as hardcoding the nested refresh rate breaks VRR (Gamescope issue #975).
-# --adaptive-sync enables VRR within the display's native range.
-exec gamescope \\
-    -W ${SCREEN_WIDTH} -H ${SCREEN_HEIGHT} \\
-    -w ${SCREEN_WIDTH} -h ${SCREEN_HEIGHT} \\
-    -f \\
-    --generate-drm-mode fixed \\
-    --adaptive-sync \\
-    \$HDR_OPTIONS \\
-    --xwayland-count 2 \\
-    --default-touch-mode 4 \\
-    --hide-cursor-delay 3000 \\
-    --fade-out-duration 200 \\
-    -e -R "\$socket" -T "\$stats" \\
+exec gamescope \
+    -W ${SCREEN_WIDTH} -H ${SCREEN_HEIGHT} \
+    -w ${SCREEN_WIDTH} -h ${SCREEN_HEIGHT} \
+    -f \
+    -r 165 \
+    --adaptive-sync \
+    --xwayland-count 2 \
+    -e -R "$socket" -T "$stats" \
     --steam
 GSEOF
 chmod 755 /usr/lib/steamos/gamescope-session
